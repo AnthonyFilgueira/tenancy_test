@@ -7,31 +7,41 @@ use App\Repositories\Contracts\PermissionRepositoryInterface;
 
 class PermissionRepository implements PermissionRepositoryInterface
 {
+    private $permission;
+    
+    public function __construct(Permission $permission){
+        $this->permission = $permission;
+    }
     public function all()
     {
-        return Permission::all();
+        return $this->permission::all();
     }
 
-    public function find($id)
+    public function find(int $id)
     {
-        return Permission::findOrFail($id);
+        return $this->permission::findOrFail($id);
     }
 
     public function create(array $data)
     {
-        return Permission::create($data);
+        return $this->permission::create($data);
     }
 
-    public function update($id, array $data)
+    public function update(int $id, array $data)
     {
-        $model = $this->find($id);
-        $model->update($data);
-        return $model;
+        $permission = $this->find($id);
+        $permission->update($data);
+        return $permission;
     }
 
     public function delete($id)
     {
-        $model = $this->find($id);
-        return $model->delete();
+        $permission = $this->find($id);
+        return $permission->delete();
+    }
+
+    public function paginate(int $records)
+    {
+        return $this->permission::paginate($records);
     }
 }

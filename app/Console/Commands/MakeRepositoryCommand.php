@@ -70,16 +70,19 @@ class MakeRepositoryCommand extends Command
             interface {$name}RepositoryInterface
             {
                 public function all();
-                public function find(\$id);
+                public function find(int \$id);
                 public function create(array \$data);
-                public function update(\$id, array \$data);
-                public function delete(\$id);
+                public function update(int \$id, array \$data);
+                public function delete(int \$id);
+                public function paginage(int \$records);
             }
             PHP;
     }
 
     protected function getRepositoryTemplate(string $name): string
     {
+
+        $nameLowerCase = strtolower($name);
         return <<<PHP
         <?php
 
@@ -90,32 +93,43 @@ class MakeRepositoryCommand extends Command
 
         class {$name}Repository implements {$name}RepositoryInterface
         {
+            private \${$nameLowerCase};
+    
+            public function __construct({$name} \${$nameLowerCase})
+            {
+                \$this->{$nameLowerCase} = \${$nameLowerCase};
+            }
             public function all()
             {
-                return {$name}::all();
+                return \$this->{$nameLowerCase}::all();
             }
 
             public function find(\$id)
             {
-                return {$name}::findOrFail(\$id);
+                return \$this->{$nameLowerCase}::findOrFail(\$id);
             }
 
             public function create(array \$data)
             {
-                return {$name}::create(\$data);
+                return \$this->{$nameLowerCase}::create(\$data);
             }
 
-            public function update(\$id, array \$data)
+            public function update(int \$id, array \$data)
             {
-                \$model = \$this->find(\$id);
-                \$model->update(\$data);
-                return \$model;
+                \${$nameLowerCase} = \$this->find(\$id);
+                \${$nameLowerCase}->update(\$data);
+                return \${$nameLowerCase};
             }
 
             public function delete(\$id)
             {
-                \$model = \$this->find(\$id);
-                return \$model->delete();
+                \${$nameLowerCase} = \$this->find(\$id);
+                return \${$nameLowerCase}->delete();
+            }
+
+            public function paginate(int \$records)
+            {
+                return \$this->{$nameLowerCase}::paginate(\$records);
             }
         }
         PHP;

@@ -12,7 +12,9 @@ use App\Contracts\RoleRepositoryInterface;
 class RoleController extends Controller
 {
     public function __construct(
-        private readonly RoleRepositoryInterface $roleRepository
+        private readonly RoleRepositoryInterface $roleRepository,
+        private readonly PermissionRepositoryInterface $permissionRepository
+
     ) {}
 
     public function index()
@@ -24,7 +26,7 @@ class RoleController extends Controller
 
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = $this->permissionRepository->all();
         return view('roles.create', compact('permissions'));
     }
 
@@ -32,33 +34,33 @@ class RoleController extends Controller
     {
         $role =  $this->roleRepository->create(['name' => $request->name]);
         
-        $permissions = collect($request->permissions ?? [])->map(fn($id) => (int) $id)->toArray();
-
-        $role->syncPermissions(is_array($permissions) ? $permissions : []);
+        $this->roleRepository->syncPermissions($role->id, $request->permissions);
 
         return redirect()->route('roles.index')->with('success', 'Role creado correctamente');
     }
 
     public function edit(Role $role)
     {
-        $permissions = Permission::all();
+        $permissions = $this->permissionRepository->all();
+
         $role->load('permissions');
+
         return view('roles.edit', compact('role', 'permissions'));
     }
 
     public function update(UpdateRoleRequest $request, Role $role)
     {
+        $role = $this->roleRepository->update($role->id, ['name' => $request->name]);
         
-        $role->update(['name' => $request->name]);
-        $permissions = collect($request->permissions ?? [])->map(fn($id) => (int) $id)->toArray();
-        $role->syncPermissions(is_array($permissions) ? $permissions : []);
+        $this->roleRepository->syncPermissions($role->id, $request->permissions);
 
         return redirect()->route('roles.index')->with('success', 'Role actualizado correctamente');
     }
 
     public function destroy(Role $role)
     {
-        $role->delete();
+        $this->roleRepository->delete($role->id);
+        
         return redirect()->route('roles.index')->with('success', 'Role eliminado');
     }
 }

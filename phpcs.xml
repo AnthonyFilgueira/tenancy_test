@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12">
+    <description>Laravel Sail PSR12 ruleset</description>
+    <rule ref="PSR12"/>
+    <file>app</file>
+    <file>routes</file>
+    <file>database</file>
+    <file>tests</file>
+</ruleset>

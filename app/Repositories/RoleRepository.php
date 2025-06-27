@@ -9,6 +9,7 @@ use App\Contracts\RoleRepositoryInterface;
 class RoleRepository implements RoleRepositoryInterface
 {
     private $role;
+
     public function __construct(Role $role){
         $this->role = $role;
     }
@@ -25,7 +26,7 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function create(array $data)
     {
-        return Role::create($data);
+        return $this->role::create($data);
     }
     public function with(array $relations)
     {
@@ -36,11 +37,16 @@ class RoleRepository implements RoleRepositoryInterface
     {
         return $this->role::paginate($records);
     }
-    public function syncPermissions(int $id, array $data)
-    {
-        $role = $this->find($id);
 
-        $role->syncPermissions($data);
+    public function syncPermissions(int $roleId, array $permissions)
+    {   
+        $permissions = is_array($permissions) ? $permissions : [];
+
+        $permissions = collect($permissions ?? [])->map(fn($id) => (int) $id)->toArray();
+
+        $role = $this->find($roleId);
+
+        $role->syncPermissions($permissions);
 
         return $role;
     }
