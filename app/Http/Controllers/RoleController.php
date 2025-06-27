@@ -3,16 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Contracts\RoleRepositoryInterface;
 
 class RoleController extends Controller
 {
+    public function __construct(
+        private readonly RoleRepositoryInterface $roleRepository
+    ) {}
+
     public function index()
     {
-        $roles = Role::with('permissions')->paginate(10);
+        $roles = $this->roleRepository->with(['permissions'])->paginate(10);
+        
         return view('roles.index', compact('roles'));
     }
 
@@ -24,7 +30,7 @@ class RoleController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
-        $role = Role::create(['name' => $request->name]);
+        $role =  $this->roleRepository->create(['name' => $request->name]);
         
         $permissions = collect($request->permissions ?? [])->map(fn($id) => (int) $id)->toArray();
 
