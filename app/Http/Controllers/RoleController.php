@@ -1,67 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+use App\Contracts\RoleRepositoryInterface;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use Spatie\Permission\Models\Permission;
-use App\Contracts\RoleRepositoryInterface;
 use App\Repositories\Contracts\PermissionRepositoryInterface;
+use Spatie\Permission\Models\Role;
 
-class RoleController extends Controller
+final class RoleController extends Controller
 {
-    public function __construct(
-        private readonly RoleRepositoryInterface $roleRepository,
-        private readonly PermissionRepositoryInterface $permissionRepository
+	public function __construct(
+		private readonly RoleRepositoryInterface $roleRepository,
+		private readonly PermissionRepositoryInterface $permissionRepository
+	) {}
 
-    ) {}
+	public function index()
+	{
+		$roles = $this->roleRepository->with(['permissions'])->paginate(10);
 
-    public function index()
-    {
-        $roles = $this->roleRepository->with(['permissions'])->paginate(10);
-        
-        return view('roles.index', compact('roles'));
-    }
+		return view('roles.index', compact('roles'));
+	}
 
-    public function create()
-    {
-        $permissions = $this->permissionRepository->all();
-        return view('roles.create', compact('permissions'));
-    }
+	public function create()
+	{
+		$permissions = $this->permissionRepository->all();
+		return view('roles.create', compact('permissions'));
+	}
 
-    public function store(StoreRoleRequest $request)
-    {
-        $role =  $this->roleRepository->create(['name' => $request->name]);
-        
-        $this->roleRepository->syncPermissions($role->id, $request->permissions);
+	public function store(StoreRoleRequest $request)
+	{
+		$role = $this->roleRepository->create(['name' => $request->name]);
 
-        return redirect()->route('roles.index')->with('success', 'Role creado correctamente');
-    }
+		$this->roleRepository->syncPermissions($role->id, $request->permissions);
 
-    public function edit(Role $role)
-    {
-        $permissions = $this->permissionRepository->all();
+		return redirect()->route('roles.index')->with('success', 'Role creado correctamente');
+	}
 
-        $role->load('permissions');
+	public function edit(Role $role)
+	{
+		$permissions = $this->permissionRepository->all();
 
-        return view('roles.edit', compact('role', 'permissions'));
-    }
+		$role->load('permissions');
 
-    public function update(UpdateRoleRequest $request, Role $role)
-    {
-        $role = $this->roleRepository->update($role->id, ['name' => $request->name]);
-        
-        $this->roleRepository->syncPermissions($role->id, $request->permissions);
+		return view('roles.edit', compact('role', 'permissions'));
+	}
 
-        return redirect()->route('roles.index')->with('success', 'Role actualizado correctamente');
-    }
+	public function update(UpdateRoleRequest $request, Role $role)
+	{
+		$role = $this->roleRepository->update($role->id, ['name' => $request->name]);
 
-    public function destroy(Role $role)
-    {
-        $this->roleRepository->delete($role->id);
-        
-        return redirect()->route('roles.index')->with('success', 'Role eliminado');
-    }
+		$this->roleRepository->syncPermissions($role->id, $request->permissions);
+
+		return redirect()->route('roles.index')->with('success', 'Role actualizado correctamente');
+	}
+
+	public function destroy(Role $role)
+	{
+		$this->roleRepository->delete($role->id);
+
+		return redirect()->route('roles.index')->with('success', 'Role eliminado');
+	}
 }

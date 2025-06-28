@@ -1,53 +1,55 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
-use Spatie\Permission\Models\Role;
 use App\Contracts\RoleRepositoryInterface;
+use Spatie\Permission\Models\Role;
 
-
-class RoleRepository implements RoleRepositoryInterface
+final class RoleRepository implements RoleRepositoryInterface
 {
-    private $role;
+	private $role;
 
-    public function __construct(Role $role){
-        $this->role = $role;
-    }
+	public function __construct(Role $role)
+	{
+		$this->role = $role;
+	}
 
-    public function all()
-    {
-        return $this->role::all();
-    }
+	public function all()
+	{
+		return $this->role::all();
+	}
 
-    public function find($id)
-    {
-        return $this->role::findOrFail($id);
-    }
+	public function find($id)
+	{
+		return $this->role::findOrFail($id);
+	}
 
-    public function create(array $data)
-    {
-        return $this->role::create($data);
-    }
-    public function with(array $relations)
-    {
-        return $this->role::with($relations);
-    }
+	public function create(array $data)
+	{
+		return $this->role::create($data);
+	}
+	public function with(array $relations)
+	{
+		return $this->role::with($relations);
+	}
 
-    public function paginate(int $records)
-    {
-        return $this->role::paginate($records);
-    }
+	public function paginate(int $records)
+	{
+		return $this->role::paginate($records);
+	}
 
-    public function syncPermissions(int $roleId, array $permissions)
-    {   
-        $permissions = is_array($permissions) ? $permissions : [];
+	public function syncPermissions(int $roleId, array $permissions)
+	{
+		$permissions = is_array($permissions) ? $permissions : [];
 
-        $permissions = collect($permissions ?? [])->map(fn($id) => (int) $id)->toArray();
+		$permissions = collect($permissions ?? [])->map(fn ($id) => (int) $id)->toArray();
 
-        $role = $this->find($roleId);
+		$role = $this->find($roleId);
 
-        $role->syncPermissions($permissions);
+		$role->syncPermissions($permissions);
 
-        return $role;
-    }
+		return $role;
+	}
 }

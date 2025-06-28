@@ -1,75 +1,77 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
-class UserController extends Controller
+final class UserController extends Controller
 {
-    public function index()
-    {
-        $users = User::latest()->paginate(10);
-        
-        return view('users.index', compact('users'));
-    }
+	public function index()
+	{
+		$users = User::latest()->paginate(10);
 
-    public function create()
-    {
-        $roles = Role::pluck('name', 'id');
-        return view('users.create',compact('roles'));
-    }
+		return view('users.index', compact('users'));
+	}
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-        ]);
+	public function create()
+	{
+		$roles = Role::pluck('name', 'id');
+		return view('users.create', compact('roles'));
+	}
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+	public function store(Request $request)
+	{
+		$request->validate([
+			'name' => 'required|string|max:255',
+			'email' => 'required|email|unique:users',
+			'password' => 'required|min:6',
+		]);
 
-        $user->assignRole(Role::findById($request->role)->name);
+		$user = User::create([
+			'name' => $request->name,
+			'email' => $request->email,
+			'password' => Hash::make($request->password),
+		]);
 
-        return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
-    }
+		$user->assignRole(Role::findById($request->role)->name);
 
-    public function edit(User $user)
-    {
-        $roles = Role::pluck('name', 'id');
-        $userRole = $user->roles->pluck('id')->first();
+		return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
+	}
 
-        return view('users.edit', compact('user', 'roles', 'userRole'));
-    }
+	public function edit(User $user)
+	{
+		$roles = Role::pluck('name', 'id');
+		$userRole = $user->roles->pluck('id')->first();
 
-    public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => "required|email|unique:users,email,{$user->id}",
-            'role' => 'required|exists:roles,id',
-        ]);
+		return view('users.edit', compact('user', 'roles', 'userRole'));
+	}
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+	public function update(Request $request, User $user)
+	{
+		$request->validate([
+			'name' => 'required|string|max:255',
+			'email' => "required|email|unique:users,email,{$user->id}",
+			'role' => 'required|exists:roles,id',
+		]);
 
-        $user->syncRoles([Role::findById($request->role)->name]);
-        
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
-    }
+		$user->update([
+			'name' => $request->name,
+			'email' => $request->email,
+		]);
 
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
-    }
+		$user->syncRoles([Role::findById($request->role)->name]);
+
+		return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+	}
+
+	public function destroy(User $user)
+	{
+		$user->delete();
+		return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
+	}
 }

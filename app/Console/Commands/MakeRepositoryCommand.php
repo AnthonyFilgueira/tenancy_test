@@ -1,68 +1,70 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
-class MakeRepositoryCommand extends Command
+final class MakeRepositoryCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'make:repository {name : The name of the Repository}';
+	/**
+	 * The name and signature of the console command.
+	 *
+	 * @var string
+	 */
+	protected $signature = 'make:repository {name : The name of the Repository}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Crea un Repository y su Interface de forma automática';
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = 'Crea un Repository y su Interface de forma automática';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle(): void
-    {
-        $name = Str::studly($this->argument('name'));
+	/**
+	 * Execute the console command.
+	 */
+	public function handle(): void
+	{
+		$name = Str::studly($this->argument('name'));
 
-        $interfaceDir = app_path('Repositories/Contracts');
-        $repositoryDir = app_path('Repositories');
+		$interfaceDir = app_path('Repositories/Contracts');
+		$repositoryDir = app_path('Repositories');
 
-        $interfacePath = "{$interfaceDir}/{$name}RepositoryInterface.php";
-        $repositoryPath = "{$repositoryDir}/{$name}Repository.php";
+		$interfacePath = "{$interfaceDir}/{$name}RepositoryInterface.php";
+		$repositoryPath = "{$repositoryDir}/{$name}Repository.php";
 
-        if (File::exists($interfacePath) || File::exists($repositoryPath)) {
-            $this->error('❌ El Repository o la Interface ya existen.');
-            return;
-        }
+		if (File::exists($interfacePath) || File::exists($repositoryPath)) {
+			$this->error('❌ El Repository o la Interface ya existen.');
+			return;
+		}
 
-        // Crear carpetas si no existen
-        if (!File::isDirectory($interfaceDir)) {
-            File::makeDirectory($interfaceDir, 0755, true);
-        }
+		// Crear carpetas si no existen
+		if (!File::isDirectory($interfaceDir)) {
+			File::makeDirectory($interfaceDir, 0755, true);
+		}
 
-        if (!File::isDirectory($repositoryDir)) {
-            File::makeDirectory($repositoryDir, 0755, true);
-        }
+		if (!File::isDirectory($repositoryDir)) {
+			File::makeDirectory($repositoryDir, 0755, true);
+		}
 
-        // Crear Interface
-        File::put($interfacePath, $this->getInterfaceTemplate($name));
+		// Crear Interface
+		File::put($interfacePath, $this->getInterfaceTemplate($name));
 
-        // Crear Repository
-        File::put($repositoryPath, $this->getRepositoryTemplate($name));
+		// Crear Repository
+		File::put($repositoryPath, $this->getRepositoryTemplate($name));
 
-        $this->info("✅ Repository y Interface creados correctamente:");
-        $this->line("- {$interfacePath}");
-        $this->line("- {$repositoryPath}");
-    }
+		$this->info('✅ Repository y Interface creados correctamente:');
+		$this->line("- {$interfacePath}");
+		$this->line("- {$repositoryPath}");
+	}
 
-    protected function getInterfaceTemplate(string $name): string
-    {
-        return <<<PHP
+	protected function getInterfaceTemplate(string $name): string
+	{
+		return <<<PHP
             <?php
 
             namespace App\Repositories\Contracts;
@@ -77,13 +79,12 @@ class MakeRepositoryCommand extends Command
                 public function paginage(int \$records);
             }
             PHP;
-    }
+	}
 
-    protected function getRepositoryTemplate(string $name): string
-    {
-
-        $nameLowerCase = strtolower($name);
-        return <<<PHP
+	protected function getRepositoryTemplate(string $name): string
+	{
+		$nameLowerCase = strtolower($name);
+		return <<<PHP
         <?php
 
         namespace App\Repositories;
@@ -133,5 +134,5 @@ class MakeRepositoryCommand extends Command
             }
         }
         PHP;
-    }
+	}
 }

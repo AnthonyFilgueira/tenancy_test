@@ -23,7 +23,7 @@ class CentralSeeder extends Seeder
         $permission_create = Permission::create(['name' => 'create_tenant']);
         $permission_destroy = Permission::create(['name' => 'destroy_tenant']);
         //Asignacion de permisos a rol
-         $role->syncPermissions([$permission_create->id,$permission_destroy->id]);
+        $role->syncPermissions([$permission_create->id,$permission_destroy->id]);
         //creacion de usuario super admin
         $user = User::create([
             'name' => 'Super Admin',

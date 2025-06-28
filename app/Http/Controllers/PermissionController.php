@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
-use Spatie\Permission\Models\Permission;
+use App\Repositories\Contracts\PermissionRepositoryInterface;
 
 class PermissionController extends Controller
 {
     public function __construct(
         private readonly PermissionRepositoryInterface $permissionRepository
-    ) {}
-    
+	) {}
+
     public function index()
     {
         $permissions = $this->permissionRepository->paginate(10);
@@ -24,11 +24,10 @@ class PermissionController extends Controller
     {
         return view('permissions.create');
     }
-
     public function store(StorePermissionRequest $request)
     {
         $this->permissionRepository->create(['name' => $request->name]);
-        
+
         return redirect()->route('permissions.index')->with('success', 'Permiso creado');
     }
 
@@ -39,13 +38,15 @@ class PermissionController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-        $permission->update(['name' => $request->name]);
+        $this->permissionRepository->update($permission->id,['name' => $request->name]);
+        
         return redirect()->route('permissions.index')->with('success', 'Permiso actualizado');
     }
 
     public function destroy(Permission $permission)
     {
-        $permission->delete();
+        $this->permissionRepository->delete($permission->id);
+        
         return redirect()->route('permissions.index')->with('success', 'Permiso eliminado');
     }
 }
