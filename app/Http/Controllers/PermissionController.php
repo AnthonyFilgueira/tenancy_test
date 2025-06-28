@@ -9,9 +9,14 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
+    public function __construct(
+        private readonly PermissionRepositoryInterface $permissionRepository
+    ) {}
+    
     public function index()
     {
-        $permissions = Permission::paginate(10);
+        $permissions = $this->permissionRepository->paginate(10);
+
         return view('permissions.index', compact('permissions'));
     }
 
@@ -22,7 +27,8 @@ class PermissionController extends Controller
 
     public function store(StorePermissionRequest $request)
     {
-        Permission::create(['name' => $request->name]);
+        $this->permissionRepository->create(['name' => $request->name]);
+        
         return redirect()->route('permissions.index')->with('success', 'Permiso creado');
     }
 

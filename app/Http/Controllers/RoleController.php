@@ -8,6 +8,7 @@ use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use Spatie\Permission\Models\Permission;
 use App\Contracts\RoleRepositoryInterface;
+use App\Repositories\Contracts\PermissionRepositoryInterface;
 
 class RoleController extends Controller
 {
